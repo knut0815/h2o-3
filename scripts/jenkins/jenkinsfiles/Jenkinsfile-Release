@@ -337,6 +337,9 @@ EOF
                     prepareH2OVersionCheckScript(env.PROJECT_VERSION)
 
                     if (params.UPLOAD_CONDA) {
+
+                        final def condaS3Dir = "${env.S3_ROOT}/${env.BRANCH_NAME}/${currentBuild.number}/Python/Conda"
+
                         // build for all Python versions
                         for (pyVersion in pipelineContext.getBuildConfig().PYTHON_VERSIONS) {
                             def uploadToCondaStageName = "Upload Py${pyVersion} to Conda"
@@ -356,6 +359,12 @@ EOF
                                                 PKG_NAME=\$(basename \$CONDA_PKG_CURRENT_ARCH_PATH)
                                                 # Convert conda package for all other platforms
                                                 conda convert \$CONDA_PKG_CURRENT_ARCH_PATH -p all
+                                                
+                                                s3cmd --acl-public put osx-64/\${PKG_NAME} ${condaS3Dir}/osx-64/\${PKG_NAME}
+                                                s3cmd --acl-public put linux-32/\${PKG_NAME} ${condaS3Dir}/linux-32/\${PKG_NAME}
+                                                s3cmd --acl-public put linux-64/\${PKG_NAME} ${condaS3Dir}/linux-64/\${PKG_NAME}
+                                                s3cmd --acl-public put win-32/\${PKG_NAME} ${condaS3Dir}/win-32/\${PKG_NAME}
+                                                s3cmd --acl-public put win-64/\${PKG_NAME} ${condaS3Dir}/win-64/\${PKG_NAME}
                                                 
                                                 if [ "\$TEST_RELEASE" = true ]; then
                                                     echo '****** WARNING! Upload to Conda suppressed ******'
@@ -411,6 +420,40 @@ EOF
                             }
                         } else {
                             echo 'Marked as TEST_RELEASE, don\'t check uploaded Conda packages'
+                        }
+
+                        // check that S3 Conda package for each Python version reports correct H2O version and can be installed
+                        for (pyVersion in pipelineContext.getBuildConfig().PYTHON_VERSIONS) {
+                            def checkCondaStageName = "Check Py${pyVersion} Conda Package Offline"
+                            stage(checkCondaStageName) {
+                                pipelineContext.getBuildSummary().addStageSummary(this, checkCondaStageName, env.BUILD_NUMBER_DIR)
+                                pipelineContext.getBuildSummary().setStageDetails(this, checkCondaStageName, env.NODE_NAME, env.WORKSPACE)
+                                try {
+                                    insideDocker([], pipelineContext.getBuildConfig().DEFAULT_IMAGE, pipelineContext.getBuildConfig().DOCKER_REGISTRY, pipelineContext.getBuildConfig(), 2, 'HOURS') {
+                                        echo "Check Conda package for Python ${pyVersion} --offline"
+                                        sh "conda create -y -n py${pyVersion} python=${pyVersion} anaconda"
+
+                                        def final condaPkg = "h2o-${env.PROJECT_VERSION}-py${pyVersion}_*.tar.bz2"
+                                        sh """
+                                            bash -c \"\"\"
+                                                cd ${BUILD_NUMBER_DIR}
+                                                source activate py${pyVersion}
+                                                
+                                                s3cmd get ${condaS3Dir}/linux-64/${condaPkg}
+                                                conda install --offline ${condaPkg}
+
+                                                python --version
+                                                python h2o_test.py
+                                            \"\"\"
+                                        """
+                                        sh "rm -f ${BUILD_NUMBER_DIR}/h2o-${env.PROJECT_VERSION}-py${pyVersion}_*.tar.bz2"
+                                    }
+                                    pipelineContext.getBuildSummary().markStageSuccessful(this, checkCondaStageName)
+                                } catch (Exception e) {
+                                    pipelineContext.getBuildSummary().markStageFailed(this, checkCondaStageName)
+                                    throw e
+                                }
+                            }
                         }
                     }
 
