@@ -223,7 +223,7 @@ def call(final pipelineContext) {
     [
       stageName: 'h2o-algos Coverage', target: 'coverage-junit-algos', pythonVersion: '2.7', timeoutValue: 24 * 60,
       component: pipelineContext.getBuildConfig().COMPONENT_JAVA, archiveAdditionalFiles: ['build/reports/jacoco/*.exec'],
-      additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY]
+      additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_PY], nodeLabel: "${pipelineContext.getBuildConfig().getDefaultNodeLabel()} && !micro"
     ]
   ]
 
