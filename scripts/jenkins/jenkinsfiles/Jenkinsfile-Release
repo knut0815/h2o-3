@@ -433,7 +433,8 @@ EOF
                                         echo "Check Conda package for Python ${pyVersion} --offline"
                                         sh "conda create -y -n py${pyVersion} python=${pyVersion} anaconda"
 
-                                        def final condaPkg = "h2o-${env.PROJECT_VERSION}-py${pyVersion}_*.tar.bz2"
+                                        def final packagePyVersion = pyVersion.replaceAll('\\.', '')
+                                        def final condaPkg = "h2o-${env.PROJECT_VERSION}-py${packagePyVersion}_*.tar.bz2"
                                         sh """
                                             bash -c \"\"\"
                                                 cd ${BUILD_NUMBER_DIR}
@@ -443,10 +444,10 @@ EOF
                                                 conda install --offline ${condaPkg}
 
                                                 python --version
-                                                python h2o_test.py
+                                                python ../h2o_test.py
                                             \"\"\"
                                         """
-                                        sh "rm -f ${BUILD_NUMBER_DIR}/h2o-${env.PROJECT_VERSION}-py${pyVersion}_*.tar.bz2"
+                                        sh "rm -f ${BUILD_NUMBER_DIR}/${condaPkg}"
                                     }
                                     pipelineContext.getBuildSummary().markStageSuccessful(this, checkCondaStageName)
                                 } catch (Exception e) {
