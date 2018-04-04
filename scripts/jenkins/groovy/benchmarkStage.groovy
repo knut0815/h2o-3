@@ -9,8 +9,8 @@ def call(final pipelineContext, final stageConfig) {
   final GString TEST_CASES_FILE = "test_cases_${stageConfig.customData.model}.csv"
   final GString ML_BENCHMARK_ROOT = "${env.WORKSPACE}/${pipelineContext.getUtils().stageNameToDirName(stageConfig.stageName)}/h2o-3/ml-benchmark"
 
-  stageConfig.datasetsPath = stageConfig.datasetsPath ?: "${ML_BENCHMARK_ROOT}/h2oR/${DATASETS_FILE}"
-  stageConfig.testCasesPath = stageConfig.testCasesPath ?: "${ML_BENCHMARK_ROOT}/h2oR/${TEST_CASES_FILE}"
+  stageConfig.datasetsPath = "${ML_BENCHMARK_ROOT}/h2oR/${DATASETS_FILE}"
+  stageConfig.testCasesPath = "${ML_BENCHMARK_ROOT}/h2oR/${TEST_CASES_FILE}"
   stageConfig.makefilePath = stageConfig.makefilePath ?: "${ML_BENCHMARK_ROOT}/jenkins/Makefile.jenkins"
 
   dir (ML_BENCHMARK_ROOT) {

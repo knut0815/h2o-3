@@ -132,6 +132,12 @@ def call(final pipelineContext) {
       timeoutValue: 120, target: 'benchmark', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
       additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_R], image: pipelineContext.getBuildConfig().BENCHMARK_IMAGE,
       nodeLabel: pipelineContext.getBuildConfig().getBenchmarkNodeLabel(), customData: [model: 'gbm'], makefilePath: pipelineContext.getBuildConfig().BENCHMARK_MAKEFILE_PATH
+    ],
+    [
+      stageName: 'XGB Benchmark', executionScript: 'h2o-3/scripts/jenkins/groovy/benchmarkStage.groovy',
+      timeoutValue: 120, target: 'benchmark', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
+      additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_R], image: pipelineContext.getBuildConfig().BENCHMARK_IMAGE,
+      nodeLabel: pipelineContext.getBuildConfig().getBenchmarkNodeLabel(), customData: [model: 'xgb'], makefilePath: pipelineContext.getBuildConfig().BENCHMARK_MAKEFILE_PATH
     ]
   ]
 
