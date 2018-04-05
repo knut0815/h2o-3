@@ -14,7 +14,8 @@ def call(final pipelineContext, final stageConfig) {
   stageConfig.makefilePath = stageConfig.makefilePath ?: "${ML_BENCHMARK_ROOT}/jenkins/Makefile.jenkins"
 
   dir (ML_BENCHMARK_ROOT) {
-    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'master']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: H2O_OPS_CREDS_ID, url: 'https://github.com/h2oai/ml-benchmark']]]
+    // FIXME set master branch
+    checkout changelog: false, poll: false, scm: [$class: 'GitSCM', branches: [[name: 'mr/ita/269-xgb-benchmarks']], doGenerateSubmoduleConfigurations: false, extensions: [], submoduleCfg: [], userRemoteConfigs: [[credentialsId: H2O_OPS_CREDS_ID, url: 'https://github.com/h2oai/ml-benchmark']]]
     sh "sed 'sed 's/https:\\/\\/.*\\//\\/datasets\\//g' h2oR/accuracy_datasets_h2o.csv > h2oR/accuracy_datasets_docker.csv"
   }
 
