@@ -137,8 +137,10 @@ def call(final pipelineContext) {
       stageName: 'XGB Benchmark', executionScript: 'h2o-3/scripts/jenkins/groovy/benchmarkStage.groovy',
       timeoutValue: 120, target: 'benchmark', component: pipelineContext.getBuildConfig().COMPONENT_ANY,
       additionalTestPackages: [pipelineContext.getBuildConfig().COMPONENT_R], image: pipelineContext.getBuildConfig().BENCHMARK_IMAGE,
-      nodeLabel: pipelineContext.getBuildConfig().getBenchmarkNodeLabel(), customData: [model: 'xgb'], makefilePath: pipelineContext.getBuildConfig().BENCHMARK_MAKEFILE_PATH
-    ]
+      customData: [model: 'xgb'], makefilePath: pipelineContext.getBuildConfig().BENCHMARK_MAKEFILE_PATH,
+// FIXME run on any node
+//      nodeLabel: pipelineContext.getBuildConfig().getBenchmarkNodeLabel(),
+]
   ]
 
   // Stages executed in addition to PR_STAGES after merge to master.
